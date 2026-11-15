@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace PDSWARS.Core {
+namespace PDSWARS.Core.Cubes {
 
     public class Cube : MonoBehaviour {
 
@@ -47,6 +47,10 @@ namespace PDSWARS.Core {
             for (int x = 0 - 1; x < floorSideLength + 1; x++)
             for (int y = 0 - 1; y < floorSideLength + 1; y++)
             for (int z = 0 - 1; z < floorSideLength + 1; z++) {
+                // Skip cube edges to avoid overhanging cubes on overflow layer
+                if (IsEnd(x, -1, floorSideLength + 1) && IsEnd(y, -1, floorSideLength + 1) ||
+                    IsEnd(y, -1, floorSideLength + 1) && IsEnd(z, -1, floorSideLength + 1) ||
+                    IsEnd(x, -1, floorSideLength + 1) && IsEnd(z, -1, floorSideLength + 1)) continue;
                 Cubelet.Data toAdd = null;
                 Vector3Int pos = new Vector3Int(x + startingCoordinate, y + startingCoordinate, z + startingCoordinate);
                 // Initialize cubelet at once if it is exposed, or part of the overflow
@@ -74,6 +78,10 @@ namespace PDSWARS.Core {
                 cubelets.Add(pair.Key, pair.Value);
             }
             return cubelets;
+        }
+
+        private static bool IsEnd(int value, int startInclusive, int endExclusive) {
+            return value == startInclusive || value == endExclusive - 1;
         }
 
     }

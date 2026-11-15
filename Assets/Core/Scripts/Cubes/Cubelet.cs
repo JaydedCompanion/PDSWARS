@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace PDSWARS.Core {
+namespace PDSWARS.Core.Cubes {
 
     public class Cubelet : MonoBehaviour {
 
