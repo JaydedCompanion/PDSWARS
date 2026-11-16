@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace PDSWARS.Core.Cubes {
+namespace PDSWARS.Core.Universe.Cubes {
 
     public class Cube : MonoBehaviour {
 

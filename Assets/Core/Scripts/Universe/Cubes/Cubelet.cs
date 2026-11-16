@@ -1,8 +1,7 @@
 using System;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
-namespace PDSWARS.Core.Cubes {
+namespace PDSWARS.Core.Universe.Cubes {
 
     public class Cubelet : MonoBehaviour {
 
@@ -34,7 +33,7 @@ namespace PDSWARS.Core.Cubes {
             /// <returns>The Cubelet (MonoBehaviour) instance that has been added to the scene.</returns>
             public Cubelet Instantiate() {
                 if (!_instance) {
-                    _instance = Object.Instantiate(Prefab, Parent.transform);
+                    _instance = UnityEngine.Object.Instantiate(Prefab, Parent.transform);
                     _instance.data = this;
                     _instance.transform.localPosition = Position * _instance.size;
                     return _instance;
