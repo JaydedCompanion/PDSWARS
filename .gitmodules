@@ -1,0 +1,3 @@
+[submodule "Assets/IrisUtils"]
+	path = Assets/IrisUtils
+	url = https://github.com/JaydedCompanion/IrisUtils.git
