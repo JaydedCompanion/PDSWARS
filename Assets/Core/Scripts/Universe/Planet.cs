@@ -20,7 +20,9 @@ namespace PDSWARS.Core.Universe {
         // Update is called once per frame
         void Update() { }
 
+        #if UNITY_EDITOR
         [MenuItem("ATProto/Test OAuth")]
+        #endif
         public static void TestOAuth() {
             AtProtoLogin login = new GameObject("AtProtoLoginTester", typeof(AtProtoLogin)).GetComponent<AtProtoLogin>();
             login.Handle = "@jayde.callejas.xyz";

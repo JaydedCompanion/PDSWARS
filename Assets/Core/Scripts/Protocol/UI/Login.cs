@@ -1,8 +1,9 @@
 using AtProtoUnity;
+using PDSWARS.GameState;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace PDSWARS.Core.Protocol.UI {
+namespace PDSWARS.Protocol.UI {
 
     [RequireComponent(typeof(AtProtoLogin))]
     public class Login : MonoBehaviour {
@@ -66,7 +67,7 @@ namespace PDSWARS.Core.Protocol.UI {
         }
 
         public void LoginComplete() {
-            _ = new GameObject(AtpLogin.Handle);
+            _ = GameManager.Instance.PlayerJoin(AtpLogin.Identity);
         }
 
     }

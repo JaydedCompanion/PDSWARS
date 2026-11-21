@@ -109,3 +109,6 @@ fmod_editor.log
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# IrisUtils .meta files
+/[Aa]ssets/IrisUtils*.meta

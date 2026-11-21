@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace PDSWARS.Core.Universe.Cubes {
+namespace PDSWARS.Universe.Cubes {
 
     public class Cubelet : MonoBehaviour {
 

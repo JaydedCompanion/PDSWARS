@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace PDSWARS.Core.Protocol {
+namespace PDSWARS.Protocol {
 
     public class Player : MonoBehaviour {
 

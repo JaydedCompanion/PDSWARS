@@ -1,7 +1,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace PDSWARS.Core.Universe.Cubes.Editor {
+namespace PDSWARS.Universe.Cubes.Editor {
 
     [CustomEditor(typeof(Cube))]
     public class CubeEditor : UnityEditor.Editor {
