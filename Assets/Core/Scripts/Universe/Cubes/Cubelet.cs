@@ -1,12 +1,14 @@
 using System;
+using FishNet.Object.Synchronizing;
+using FishNet.Object.Synchronizing.Internal;
 using UnityEngine;
 
 namespace PDSWARS.Universe.Cubes {
 
     public class Cubelet : MonoBehaviour {
-
+        
         [Serializable]
-        public class Data {
+        public struct Data {
             public Cubelet Instance {
                 get{
                     if (_instance != null) return _instance;
@@ -17,12 +19,18 @@ namespace PDSWARS.Universe.Cubes {
             }
             private Cubelet _instance;
 
+            /// <summary>
+            /// Whether this struct's constructor has been called and data has been assigned
+            /// </summary>
+            public bool Initialized { get; private set; }
             [field:SerializeField]
             public Vector3Int Position { get; private set; }
             [field:SerializeField]
             public Cube Parent { get; private set; }
             
             public Data(Vector3Int pos, Cube parent) {
+                Initialized = true;
+                _instance = null;
                 Position = pos;
                 Parent = parent;
             }

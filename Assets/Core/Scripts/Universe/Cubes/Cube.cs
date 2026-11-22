@@ -1,30 +1,38 @@
 using System.Collections.Generic;
 using System.Linq;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
+using FishNet.Serializing;
 using UnityEngine;
 
 namespace PDSWARS.Universe.Cubes {
 
-    public class Cube : MonoBehaviour {
+    public class Cube : NetworkBehaviour {
 
         public int volume;
 
-        private Dictionary<Vector3Int, Cubelet.Data> _cubelets = new();
-
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start() {
+        private readonly SyncDictionary<Vector3Int, Cubelet.Data> _cubelets = new();
+        
+        public override void OnStartServer() {
             Initialize();
         }
 
+        [ServerRpc]
         public void Initialize() {
             for (int i = transform.childCount - 1; i >= 0; i--)
                 if (Application.isPlaying)
                     Destroy(transform.GetChild(i).gameObject);
                 else
                     DestroyImmediate(transform.GetChild(i).gameObject);
-            _cubelets = GenerateCube(volume, this);
-            foreach (KeyValuePair<Vector3Int, Cubelet.Data> pair in _cubelets)
-                if (pair.Value != null)
+            _cubelets.Collection = GenerateCube(volume, this);
+            var writer = new PooledWriter();
+            foreach (KeyValuePair<Vector3Int, Cubelet.Data> pair in _cubelets.Collection)
+                if (pair.Value.Initialized) {
+                    writer.Write(typeof(Cubelet.Data));
                     pair.Value.Instantiate();
+                }
+            // Set the whole thing dirty, since we just generated a brand-new cube
+            _cubelets.DirtyAll();
         }
 
         /// <summary>
@@ -51,7 +59,7 @@ namespace PDSWARS.Universe.Cubes {
                 if (IsEnd(x, -1, floorSideLength + 1) && IsEnd(y, -1, floorSideLength + 1) ||
                     IsEnd(y, -1, floorSideLength + 1) && IsEnd(z, -1, floorSideLength + 1) ||
                     IsEnd(x, -1, floorSideLength + 1) && IsEnd(z, -1, floorSideLength + 1)) continue;
-                Cubelet.Data toAdd = null;
+                Cubelet.Data toAdd = default;
                 Vector3Int pos = new Vector3Int(x + startingCoordinate, y + startingCoordinate, z + startingCoordinate);
                 // Initialize cubelet at once if it is exposed, or part of the overflow
                 if (

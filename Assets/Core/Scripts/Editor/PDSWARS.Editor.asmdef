@@ -1,8 +1,9 @@
 {
     "name": "PDSWARS.Editor",
-    "rootNamespace": "",
+    "rootNamespace": "PDSWARS",
     "references": [
-        "GUID:2351fc0cc3b0a45b28c1e14bdce72476"
+        "GUID:2351fc0cc3b0a45b28c1e14bdce72476",
+        "GUID:7c88a4a7926ee5145ad2dfa06f454c67"
     ],
     "includePlatforms": [
         "Editor"
