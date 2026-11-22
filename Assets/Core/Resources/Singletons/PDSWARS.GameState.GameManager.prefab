@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8331447323523056332}
   - component: {fileID: 4528585906269346339}
   m_Layer: 0
-  m_Name: PDSWARS.Core.GameState.GameManager
+  m_Name: PDSWARS.GameState.GameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

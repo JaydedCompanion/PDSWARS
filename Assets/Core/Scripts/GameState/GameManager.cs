@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using AtProtoUnity;
 using IrisUtils;
-using PDSWARS.Core.Universe;
 using PDSWARS.Protocol;
+using PDSWARS.Universe;
 using UnityEngine;
 
 namespace PDSWARS.GameState {

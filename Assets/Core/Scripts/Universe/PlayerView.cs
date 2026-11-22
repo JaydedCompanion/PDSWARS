@@ -1,5 +1,8 @@
 using System;
 using FishNet.Object;
+using FishNet.Object.Synchronizing;
+using PDSWARS.Protocol;
+using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,6 +10,10 @@ namespace PDSWARS.Universe {
 
     public class PlayerView : NetworkBehaviour {
 
+        public readonly SyncVar<string> AtpHandle = new();
+        public readonly SyncVar<string> AtpBskyDisplayName = new();
+
+        public TextMeshPro handleDisplay;
         public Camera povCam;
         public string panActionName = "Pan";
         public Vector2 panSensitivity = new(1, -1);
@@ -37,7 +44,10 @@ namespace PDSWARS.Universe {
             if (IsOwner) {
                 if (Camera.main != null && Camera.main != povCam) Destroy(Camera.main.gameObject);
                 povCam.enabled = true;
+                UpdateName(Player.AtpIdentity.Handle, Player.BskyDisplayName);
             }
+
+            handleDisplay.text = AtpBskyDisplayName.Value;
         }
 
         public void Update() {
@@ -60,6 +70,14 @@ namespace PDSWARS.Universe {
             transform.RotateAround(FocusPosition, Vector3.up, Pointer.current.delta.x.value * panSensitivity.x);
             transform.RotateAround(FocusPosition, transform.right, Pointer.current.delta.y.value * panSensitivity.y);
             
+        }
+        
+        [ServerRpc]
+        private void UpdateName(string handle, string displayName) {
+            Debug.Log($"Updating handle {handle} and displayName {displayName}.");
+            AtpHandle.Value = handle;
+            AtpBskyDisplayName.Value = displayName;
+            handleDisplay.text = displayName;
         }
 
     }

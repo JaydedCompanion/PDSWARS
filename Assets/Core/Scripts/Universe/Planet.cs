@@ -2,7 +2,7 @@ using AtProtoUnity;
 using UnityEditor;
 using UnityEngine;
 
-namespace PDSWARS.Core.Universe {
+namespace PDSWARS.Universe {
 
     [RequireComponent(typeof(AtProtoLogin))]
     // ReSharper disable once InconsistentNaming
