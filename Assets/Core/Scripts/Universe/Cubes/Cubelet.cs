@@ -1,11 +1,12 @@
 using System;
+using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using FishNet.Object.Synchronizing.Internal;
 using UnityEngine;
 
 namespace PDSWARS.Universe.Cubes {
 
-    public class Cubelet : MonoBehaviour {
+    public class Cubelet : NetworkBehaviour {
         
         [Serializable]
         public struct Data {

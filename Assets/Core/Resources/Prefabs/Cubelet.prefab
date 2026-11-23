@@ -45,6 +45,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09089faf5aae40ada30a8f97f957a858, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PDSWARS.Core.Cubelet
+  _componentIndexCache: 255
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  data:
+    <Position>k__BackingField: {x: 0, y: 0, z: 0}
+    <Parent>k__BackingField: {fileID: 0}
   size: 1
 --- !u!1 &3608820976173977933
 GameObject:

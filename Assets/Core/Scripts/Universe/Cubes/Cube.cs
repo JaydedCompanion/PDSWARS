@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using FishNet;
+using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
 using FishNet.Serializing;
@@ -13,26 +15,52 @@ namespace PDSWARS.Universe.Cubes {
 
         private readonly SyncDictionary<Vector3Int, Cubelet.Data> _cubelets = new();
         
+        /// <summary>
+        /// Called on the server when the server starts
+        /// </summary>
         public override void OnStartServer() {
             Initialize();
         }
 
-        [ServerRpc]
+        /// <summary>
+        /// Called on the server when a new client is spawned
+        /// </summary>
+        /// <param name="connection"></param>
+        public override void OnSpawnServer(NetworkConnection connection) {
+            Debug.Log($"Called by server: Initializing scene for new player {connection.ClientId}");
+            InstantiateCube();
+        }
+
+        public override void OnStartClient() {
+            InstantiateCube();
+        }
+
+        [Server]
         public void Initialize() {
+            _cubelets.OnChange += (op, key, value, server) =>
+                Debug.Log($"Received changed value for key {key}: {value}.");
             for (int i = transform.childCount - 1; i >= 0; i--)
                 if (Application.isPlaying)
                     Destroy(transform.GetChild(i).gameObject);
                 else
                     DestroyImmediate(transform.GetChild(i).gameObject);
             _cubelets.Collection = GenerateCube(volume, this);
-            var writer = new PooledWriter();
-            foreach (KeyValuePair<Vector3Int, Cubelet.Data> pair in _cubelets.Collection)
-                if (pair.Value.Initialized) {
-                    writer.Write(typeof(Cubelet.Data));
-                    pair.Value.Instantiate();
-                }
+            foreach (var cubeletsValue in _cubelets.Collection)
+                _cubelets.Dirty(cubeletsValue.Key);
             // Set the whole thing dirty, since we just generated a brand-new cube
             _cubelets.DirtyAll();
+        }
+        
+        /// <summary>
+        /// Instantiates Cubelet prefab GameObjects according to Cubelet Data collection.
+        /// </summary>
+        public void InstantiateCube() {
+            Debug.Log($"Instantiating collection of {_cubelets.Count} cubelets.");
+            foreach (KeyValuePair<Vector3Int, Cubelet.Data> pair in _cubelets.Collection)
+                if (pair.Value.Initialized) {
+                    var instance = pair.Value.Instantiate();
+                    InstanceFinder.ServerManager.Spawn(instance.gameObject);
+                }
         }
 
         /// <summary>
