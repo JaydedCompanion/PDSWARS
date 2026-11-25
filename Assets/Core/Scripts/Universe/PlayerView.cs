@@ -1,7 +1,12 @@
 using System;
+using AtProtoUnity;
+using FishNet;
+using FishNet.Connection;
 using FishNet.Object;
 using FishNet.Object.Synchronizing;
+using PDSWARS.GameState;
 using PDSWARS.Protocol;
+using PDSWARS.Protocol.UI;
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -9,6 +14,9 @@ using UnityEngine.InputSystem;
 namespace PDSWARS.Universe {
 
     public class PlayerView : NetworkBehaviour {
+
+        public static AtProtoIdentity AtpIdentity;
+        public static AtProtoAuthenticatedClient AtpAuthClient;
 
         public readonly SyncVar<string> AtpHandle = new();
         public readonly SyncVar<string> AtpBskyDisplayName = new();
@@ -39,14 +47,29 @@ namespace PDSWARS.Universe {
         
         private bool Panning => PanAction.inProgress;
 
-        public override void OnStartClient() {
-            // When the client connects, make their PlayerView's camera the active camera
-            if (IsOwner) {
-                if (Camera.main != null && Camera.main != povCam) Destroy(Camera.main.gameObject);
+        public override void OnStartNetwork() {
+            AtpBskyDisplayName.OnChange += UpdateDisplayName;
+            //Subscribing to OnChange here occurs after AtpBskDisplayName has already been updated to match server data, so we must call it manually the first time.
+            UpdateDisplayName();
+            // When the client connects, make their PlayerView's camera the active camera (and add an audio listener, since just adding one is easier than removing all the duplicate ones)
+            if (Owner.IsLocalClient) {
+                if (Camera.main != null && Camera.main != povCam) {
+                    Destroy(Camera.main.gameObject.GetComponent<AudioListener>());
+                    Destroy(Camera.main.gameObject);
+                }
+                povCam.gameObject.AddComponent(typeof(AudioListener));
                 povCam.enabled = true;
-                UpdateName(Player.AtpIdentity.Handle, Player.BskyDisplayName);
+                PlayerJoinRpc(this, Login.Instance.AtpLogin.Identity.Handle, ClientManager.Connection);
             }
+        }
 
+        public override void OnStopClient() {
+            AtpBskyDisplayName.OnChange -= UpdateDisplayName;
+        }
+
+        private void UpdateDisplayName(string prev, string next, bool asServer) => UpdateDisplayName();
+
+        public void UpdateDisplayName() {
             handleDisplay.text = AtpBskyDisplayName.Value;
         }
 
@@ -71,14 +94,15 @@ namespace PDSWARS.Universe {
             transform.RotateAround(FocusPosition, transform.right, Pointer.current.delta.y.value * panSensitivity.y);
             
         }
-        
+
+        /// <summary>
+        /// Remote procedure call for a player's client to tell the server's GameManager instance to join the game and set up their PlayerView. Since ServerRPCs cannot be asynchronous, this just calls the actual function—PlayerJoin—which is async.
+        /// </summary>
+        /// <param name="playerView">The PlayerView instance belonging to the joining player.</param>
+        /// <param name="playerHandle">The ATProto handle of the joining player.</param>
+        /// <param name="playerClient">The NetworkConnection of the joining player's client.</param>
         [ServerRpc]
-        private void UpdateName(string handle, string displayName) {
-            Debug.Log($"Updating handle {handle} and displayName {displayName}.");
-            AtpHandle.Value = handle;
-            AtpBskyDisplayName.Value = displayName;
-            handleDisplay.text = displayName;
-        }
+        private void PlayerJoinRpc(PlayerView playerView, string playerHandle, NetworkConnection playerClient) => _ = GameManagerServer.Instance.PlayerJoin(playerView, playerHandle, playerClient);
 
     }
 

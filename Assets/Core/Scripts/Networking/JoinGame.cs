@@ -1,12 +1,10 @@
+using FishNet;
 using FishNet.Managing;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace PDSWARS.Networking {
 
     public class JoinGame : MonoBehaviour {
-
-        public Toggle host;
 
         public NetworkManager NetworkManager {
             get {
@@ -17,15 +15,23 @@ namespace PDSWARS.Networking {
         }
         private NetworkManager _networkManager;
 
+        public bool autostartServerIfEditor = true;
+
+
+        private void Start() {
+            #if UNITY_EDITOR
+            // If running as editor, act as the server by default (will save time on debugging)
+            if (!autostartServerIfEditor)
+                return;
+            ushort.TryParse(PlayerPrefs.GetString("ServerPort", "7770"), out var port);
+            InstanceFinder.ServerManager.StartConnection(port); 
+            #endif
+        }
+
         public void Connect() {
-            if (host.isOn)
-                Server();
             Join();
         }
 
-        public void Server() {
-            NetworkManager?.ServerManager.StartConnection();
-        }
         public void Join() {
             ushort.TryParse(PlayerPrefs.GetString("ServerPort", "7770"), out var port);
             NetworkManager?.ClientManager.StartConnection(PlayerPrefs.GetString("ServerAddress", "localhost"), port);

@@ -1,7 +1,6 @@
-using System;
 using AtProtoUnity;
 using IrisUtils;
-using PDSWARS.GameState;
+using PDSWARS.Universe;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -9,7 +8,7 @@ using UnityEngine.UI;
 namespace PDSWARS.Protocol.UI {
 
     [RequireComponent(typeof(AtProtoLogin))]
-    public class Login : Singleton<MonoBehaviour> {
+    public class Login : Singleton<Login> {
 
         public TMPro.TMP_InputField fieldUsername;
         public Button authenticateButton;
@@ -25,7 +24,7 @@ namespace PDSWARS.Protocol.UI {
                 return _atpLogin;
             }
         }
-        
+
         /// <summary>
         /// Function used by Button component's OnClick event to initiate ATProto authentication process.
         /// </summary>
@@ -51,7 +50,7 @@ namespace PDSWARS.Protocol.UI {
                     // TODO: Proceed to close login window add player to the game
                     // TODO: Change the log to use the display name (which will require looking up the record on the user's repository)
                     Debug.Log($"Log In Successful! Welcome, {AtpLogin.Handle}.");
-                    await LoginComplete();
+                    LoginComplete();
                     break;
                 }
                 case AtProtoLoginState.Failed: {
@@ -70,12 +69,9 @@ namespace PDSWARS.Protocol.UI {
             }
         }
 
-        private async Awaitable LoginComplete() {
-            _ = GameManager.Instance.PlayerJoin(AtpLogin.Identity);
-            Player.AtpAuthClient = AtpLogin.AuthenticatedClient;
-            Player.AtpIdentity = AtpLogin.Identity;
-            var record = await AtpLogin.AuthenticatedClient.GetRecordAsync(Player.AtpIdentity, "app.bsky.actor.profile", "self");
-            Player.BskyDisplayName = record.Value.Value["displayName"]?.ToString();
+        private void LoginComplete() {
+            PlayerView.AtpAuthClient = AtpLogin.AuthenticatedClient;
+            PlayerView.AtpIdentity = AtpLogin.Identity;
             onSuccessfulLogin?.Invoke();
         }
 

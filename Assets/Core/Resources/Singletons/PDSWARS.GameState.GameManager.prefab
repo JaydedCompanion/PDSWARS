@@ -44,3 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5958991bdf3734814ad248af2be9b714, type: 3}
   m_Name: 
   m_EditorClassIdentifier: PDSWARS::PDSWARS.Core.GameState.GameManager
+  _componentIndexCache: 0
+  _addedNetworkObject: {fileID: 0}
+  _networkObjectCache: {fileID: 0}
+  playerPrefab: {fileID: 349030237024326697, guid: 966cbff39ed8b427fb0774feaf1671b2, type: 3}
