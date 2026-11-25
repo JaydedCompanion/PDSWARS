@@ -13,8 +13,10 @@ namespace PDSWARS.Universe.Cubes.Editor {
             DrawDefaultInspector();
             _autogenerate = GUILayout.Toggle(_autogenerate, "Autogenerate");
             EditorGUI.BeginDisabledGroup(_autogenerate);
-            if ((_autogenerate && _lastVolume != ((Cube)target).volume) || GUILayout.Button("Generate Cube"))
+            if ((_autogenerate && _lastVolume != ((Cube)target).volume) || GUILayout.Button("Generate Cube")) {
                 ((Cube)target).Initialize();
+                ((Cube)target).InstantiateCubelets();
+            }
             EditorGUI.EndDisabledGroup();
             _lastVolume = ((Cube)target).volume;
         }

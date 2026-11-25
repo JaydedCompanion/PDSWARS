@@ -85,7 +85,11 @@ namespace PDSWARS.Universe.Cubes {
                 _staleNeighbours = true;
             }
             private bool _staleNeighbours;
-            
+
+            /// <summary>
+            /// Reserved for Fishnet serialization only!
+            /// </summary>
+            public Data() { }
             public Data(Vector3Int pos, Cube parent) {
                 _staleNeighbours = true;
                 Initialized = true;

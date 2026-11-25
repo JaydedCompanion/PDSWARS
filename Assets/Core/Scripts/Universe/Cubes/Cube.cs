@@ -97,7 +97,7 @@ namespace PDSWARS.Universe.Cubes {
         public void InstantiateCubelets() {
             Debug.Log($"Instantiating collection of {_cubelets.Count} cubelets.");
             foreach (KeyValuePair<Vector3Int, Cubelet.Data> pair in _cubelets.Collection)
-                if (pair.Value.Initialized) {
+                if (pair.Value is { Initialized: true }) {
                     var instance = pair.Value.Instantiate();
                     InstanceFinder.ServerManager.Spawn(instance.gameObject);
                 }
@@ -169,7 +169,7 @@ namespace PDSWARS.Universe.Cubes {
                 exposed.Clear();
                 foreach (var cubeletsValue in cubelets) {
                     Debug.Log($"Checking cubelet at {cubeletsValue.Key} for exposed sides.");
-                    if (cubeletsValue.Value.IsExposed) {
+                    if (IsExposed(cubeletsValue.Key, cubelets)) {
                         Debug.Log($"Found exposed cubelet at {cubeletsValue.Key}.");
                         exposed.Add(cubeletsValue.Key, cubeletsValue.Value);
                     }
@@ -181,6 +181,22 @@ namespace PDSWARS.Universe.Cubes {
 
         private static bool IsEnd(int value, int startInclusive, int endExclusive) {
             return value == startInclusive || value == endExclusive - 1;
+        }
+
+        private static bool IsExposed(Vector3Int pos, Dictionary<Vector3Int, Cubelet.Data> collection) {
+            if (!collection.ContainsKey(new(pos.x - 1, pos.y, pos.z)))
+                return true;
+            if (!collection.ContainsKey(new(pos.x + 1, pos.y, pos.z)))
+                return true;
+            if (!collection.ContainsKey(new(pos.x, pos.y - 1, pos.z)))
+                return true;
+            if (!collection.ContainsKey(new(pos.x, pos.y + 1, pos.z)))
+                return true;
+            if (!collection.ContainsKey(new(pos.x, pos.y, pos.z - 1)))
+                return true;
+            if (!collection.ContainsKey(new(pos.x, pos.y, pos.z + 1)))
+                return true;
+            return false;
         }
 
     }
