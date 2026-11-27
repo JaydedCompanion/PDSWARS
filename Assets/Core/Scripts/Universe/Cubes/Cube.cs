@@ -168,9 +168,7 @@ namespace PDSWARS.Universe.Cubes {
             if (exposed != null) {
                 exposed.Clear();
                 foreach (var cubeletsValue in cubelets) {
-                    Debug.Log($"Checking cubelet at {cubeletsValue.Key} for exposed sides.");
                     if (IsExposed(cubeletsValue.Key, cubelets)) {
-                        Debug.Log($"Found exposed cubelet at {cubeletsValue.Key}.");
                         exposed.Add(cubeletsValue.Key, cubeletsValue.Value);
                     }
                 }

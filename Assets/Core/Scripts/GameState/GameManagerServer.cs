@@ -67,6 +67,12 @@ namespace PDSWARS.GameState {
             Identities.Add(handle, (await Client.ResolveHandleAsync(handle)).Value);
             // TODO: Implement "Player has already joined" check
             // TODO: Initialize cube for this player's PDS if it hasn't joined
+            string endpoint;
+            if (!SyncedPdses.ContainsKey(endpoint = Identities[handle].PdsEndpoint)) {
+                Debug.Log($"Player's PDS endpoint ({endpoint}) was not found in the PDSs collection.");
+                SyncedPdses.Add(endpoint,
+                    Cube.New(endpoint, Vector3.up * (SyncedPdses.Count - 0.5f) * 10));
+            }
         }
 
     }
