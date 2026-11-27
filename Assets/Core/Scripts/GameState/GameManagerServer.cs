@@ -60,9 +60,10 @@ namespace PDSWARS.GameState {
             playerView.AtpBskyDisplayName.Value = displayName;
             if (!pdses.ContainsKey(playerIdentity.PdsEndpoint)) {
                 Debug.Log($"Player {playerIdentity.Handle}'s PDS ({playerIdentity.PdsEndpoint}) has not joined the game.");
-                pdses.Add(playerIdentity.PdsEndpoint, Cube.New(playerIdentity.PdsEndpoint));
-                
+                var newCube = Cube.New(playerIdentity.PdsEndpoint, Vector3.up * (pdses.Count - 0.5f) * 10);
+                pdses.Add(playerIdentity.PdsEndpoint, newCube);
                 pdses.Dirty(playerIdentity.PdsEndpoint);
+                Debug.Log(newCube);
             }
         }
 

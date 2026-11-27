@@ -104,12 +104,13 @@ namespace PDSWARS.Universe.Cubes {
         }
 
         [Server]
-        public static Cube New(string endpoint) {
+        public static Cube New(string endpoint, Vector3 position) {
             Cube newCube = Instantiate(Resources.Load<Cube>("Prefabs/PDS"));
-            InstanceFinder.ServerManager.Spawn(newCube.gameObject);
-            newCube.transform.position = Vector3.up * (GameManagerServer.Instance.pdses.Count - 0.5f) * 10;
+            var mngr = InstanceFinder.ServerManager;
+            newCube.transform.position = position;
             newCube.PdsEndpoint = endpoint;
             newCube.gameObject.name = $"Cube {endpoint} (PDS)";
+            mngr.Spawn(newCube.gameObject);
             return newCube;
         }
 
