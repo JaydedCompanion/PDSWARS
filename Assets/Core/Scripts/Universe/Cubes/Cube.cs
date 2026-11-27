@@ -24,9 +24,8 @@ namespace PDSWARS.Universe.Cubes {
             InstantiateCubelets();
         }
 
-        public Cubelet.Data? GetCubelet(Vector3Int pos) {
-            if (_cubelets.TryGetValue(pos, out var cubelet)) return cubelet;
-            return null;
+        public Cubelet.Data GetCubelet(Vector3Int pos) {
+            return _cubelets.GetValueOrDefault(pos);
         }
 
         [Server]

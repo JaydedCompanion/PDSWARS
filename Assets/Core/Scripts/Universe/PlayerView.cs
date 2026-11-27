@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using AtProtoUnity;
 using FishNet;
 using FishNet.Connection;
@@ -15,11 +16,11 @@ namespace PDSWARS.Universe {
 
     public class PlayerView : NetworkBehaviour {
 
-        public static AtProtoIdentity AtpIdentity;
         public static AtProtoAuthenticatedClient AtpAuthClient;
+        public static AtProtoIdentity AtpIdentity;
 
-        public readonly SyncVar<string> AtpHandle = new();
-        public readonly SyncVar<string> AtpBskyDisplayName = new();
+        public readonly SyncVar<string> SyncedAtpHandle = new();
+        public readonly SyncVar<string> SyncedAtpBskyDisplayName = new();
 
         public TextMeshPro handleDisplay;
         public Camera povCam;
@@ -48,29 +49,35 @@ namespace PDSWARS.Universe {
         private bool Panning => PanAction.inProgress;
 
         public override void OnStartNetwork() {
-            AtpBskyDisplayName.OnChange += UpdateDisplayName;
+                // ==== On-join setup for all PlayerViews ==== //
+                // (Equivalent to Start() for all instances of PlayerView)
             //Subscribing to OnChange here occurs after AtpBskDisplayName has already been updated to match server data, so we must call it manually the first time.
+            SyncedAtpBskyDisplayName.OnChange += UpdateDisplayName;
             UpdateDisplayName();
-            // When the client connects, make their PlayerView's camera the active camera (and add an audio listener, since just adding one is easier than removing all the duplicate ones)
+            
+                // ==== Setup for this client's PlayerView ==== //
+                // (Equivalent to Start() for the single instance of PlayerView belonging to this client)
             if (Owner.IsLocalClient) {
+                // When the client connects, make their PlayerView's camera the active camera (and add an audio listener, since just adding one is easier than removing all the duplicate ones)
                 if (Camera.main != null && Camera.main != povCam) {
                     Destroy(Camera.main.gameObject.GetComponent<AudioListener>());
                     Destroy(Camera.main.gameObject);
                 }
                 povCam.gameObject.AddComponent(typeof(AudioListener));
                 povCam.enabled = true;
-                PlayerJoinRpc(this, Login.Instance.AtpLogin.Identity.Handle, ClientManager.Connection);
+                _ = Initialize();
             }
         }
 
         public override void OnStopClient() {
-            AtpBskyDisplayName.OnChange -= UpdateDisplayName;
+            SyncedAtpBskyDisplayName.OnChange -= UpdateDisplayName;
         }
 
         private void UpdateDisplayName(string prev, string next, bool asServer) => UpdateDisplayName();
 
         public void UpdateDisplayName() {
-            handleDisplay.text = AtpBskyDisplayName.Value;
+            Debug.Log($"handle changed: {SyncedAtpBskyDisplayName.Value}");
+            handleDisplay.text = SyncedAtpBskyDisplayName.Value;
         }
 
         public void Update() {
@@ -94,15 +101,36 @@ namespace PDSWARS.Universe {
             transform.RotateAround(FocusPosition, transform.right, Pointer.current.delta.y.value * panSensitivity.y);
             
         }
+        
+        private async Awaitable Initialize() {
+            // Fetch the player's Bluesky display name by looking up the app.bsky.actor.profile record, getting the self class and getting the displayName JSON value.
+            var bskyDisplayName = (await AtpAuthClient.GetRecordAsync(AtpIdentity, "app.bsky.actor.profile", "self")).Value.Value["displayName"]?.ToString();
+            // Fall back to handle if no Bluesky display name was found.
+            if (string.IsNullOrEmpty(bskyDisplayName)) {
+                Debug.Log($"{AtpIdentity.Handle} doesn't have a Bluesky profile (app.bsky.actor.profile record). Defaulting to ATProto handle as display name.");
+                bskyDisplayName = AtpIdentity.Handle;
+            } else
+                Debug.Log($"Handle: \"{AtpIdentity.Handle}\" | Display name: \"{bskyDisplayName}\"");
+            // Manually update the display name once it's been acquired
+            UpdateDisplayName();
+            // Continue with initialization on server side via RPC
+            InitializeRPC(AtpIdentity.Handle, bskyDisplayName, ClientManager.Connection);
+        }
 
         /// <summary>
-        /// Remote procedure call for a player's client to tell the server's GameManager instance to join the game and set up their PlayerView. Since ServerRPCs cannot be asynchronous, this just calls the actual function—PlayerJoin—which is async.
+        /// RPC to, on this instance on the server, call GameManagerServer.PlayerJoin. Calling an RPC on the client can only be done on objects it owns (i.e. this instance of PlayerView), hence why this RPC just points to a function in a different class. Since ServerRPCs cannot be asynchronous, this just calls the actual function—PlayerJoin—which is async.
         /// </summary>
-        /// <param name="playerView">The PlayerView instance belonging to the joining player.</param>
-        /// <param name="playerHandle">The ATProto handle of the joining player.</param>
+        /// <param name="handle">Joining player's AtProto handle.</param>
+        /// <param name="displayName">The Bluesky display name (or handle, if no handle exists) of the joining player.</param>
         /// <param name="playerClient">The NetworkConnection of the joining player's client.</param>
         [ServerRpc]
-        private void PlayerJoinRpc(PlayerView playerView, string playerHandle, NetworkConnection playerClient) => _ = GameManagerServer.Instance.PlayerJoin(playerView, playerHandle, playerClient);
+        private void InitializeRPC(string handle, string displayName,  NetworkConnection playerClient) {
+            // Set SyncVars
+            SyncedAtpHandle.Value = handle;
+            SyncedAtpBskyDisplayName.Value = displayName;
+            // Register player with GameManagerServer
+            _ = GameManagerServer.Instance.PlayerJoin(this);
+        }
 
     }
 
